@@ -103,8 +103,6 @@ forgeai/
 
 ## Architecture
 
-See [docs/architecture.md](docs/architecture.md) for full system design.
-
 Clean architecture layers:
 ```
 Router → Service → Repository Layer → Database
