@@ -560,7 +560,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="px-8 py-8 max-w-6xl mx-auto">
+    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-16 sm:pt-16 lg:pt-8 max-w-6xl mx-auto w-full">
       {/* ── Page header ─────────────────────────────────────────────────── */}
       <header className="mb-8">
         <div className="flex items-center justify-between">
@@ -610,7 +610,7 @@ export default function DashboardPage() {
           {fetchError}
         </div>
       ) : loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4 sm:gap-5">
           {[1, 2, 3].map((n) => (
             <div key={n} className="card">
               <div className="skeleton h-5 w-32 mb-3 rounded" />
@@ -673,7 +673,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Cards grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 stagger-children">
+          <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4 sm:gap-5 stagger-children">
             {repos.map((repo) => (
               <RepoCard
                 key={repo.id}
