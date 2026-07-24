@@ -14,7 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from forgeai.config import get_settings
 from forgeai.core.logging import configure_logging
 from forgeai.redis_client import close_redis_pool
-from forgeai.api.v1 import health
+from forgeai.api.v1 import health, repositories
 
 settings = get_settings()
 configure_logging(debug=settings.app_debug)
@@ -61,3 +61,4 @@ app.add_middleware(
 
 # ─── Routers ──────────────────────────────────────────────────────────────────
 app.include_router(health.router, prefix="/api/v1", tags=["Health"])
+app.include_router(repositories.router, prefix="/api/v1", tags=["Repositories"])

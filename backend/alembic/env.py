@@ -14,8 +14,8 @@ from forgeai.config import get_settings
 from forgeai.database import Base  # noqa: F401 — imports all models via metadata
 
 # ─── Import all models so Alembic autogenerate can detect them ────────────────
-# Add model imports here as new models are created:
-# from forgeai.models.repository import Repository  # (added in Phase 2)
+# Phase 2 models — registers repositories + repository_files tables
+from forgeai.models import Repository, RepositoryFile  # noqa: F401
 
 # ─── Alembic Config ───────────────────────────────────────────────────────────
 config = context.config

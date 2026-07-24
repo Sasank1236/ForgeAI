@@ -93,9 +93,17 @@ App available at: http://localhost:3000
 ```
 forgeai/
 ├── backend/          # FastAPI Python backend
+│   ├── src/forgeai/
+│   │   ├── api/v1/   # REST routers (health, repositories)
+│   │   ├── models/   # SQLAlchemy ORM models
+│   │   ├── schemas/  # Pydantic DTOs
+│   │   ├── services/ # Business logic (scanner, repository_service)
+│   │   └── repositories/ # Data access layer
+│   └── alembic/      # Database migrations
 ├── frontend/         # Next.js TypeScript frontend
-├── docker/           # Additional Docker configs
-├── docs/             # Architecture documentation
+│   └── src/app/
+│       ├── page.tsx       # Landing page
+│       └── dashboard/     # Repository dashboard (Phase 2)
 └── docker-compose.yml
 ```
 
@@ -109,6 +117,55 @@ Router → Service → Repository Layer → Database
            ↕
         Schema (Pydantic DTOs)
 ```
+
+---
+
+## Phase 2 — Repository Import & File Scanner
+
+### API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/repositories/import` | Import & scan a local path |
+| `GET` | `/api/v1/repositories` | List all repositories with stats |
+| `GET` | `/api/v1/repositories/{id}` | Single repository detail |
+| `GET` | `/api/v1/repositories/{id}/files` | Paginated file list |
+| `DELETE` | `/api/v1/repositories/{id}` | Delete repository and files |
+
+### Import a repository
+
+```bash
+curl -X POST http://localhost:8000/api/v1/repositories/import \
+  -H 'Content-Type: application/json' \
+  -d '{"path": "/absolute/path/to/repo"}'
+```
+
+Response:
+```json
+{
+  "repository_id": "uuid",
+  "status": "ready",
+  "files_scanned": 428,
+  "languages": { "Python": 92, "TypeScript": 61, "Markdown": 18 },
+  "scan_time_ms": 1432
+}
+```
+
+### Scanner configuration
+
+The scanner ignores these directories by default:
+`node_modules`, `.git`, `__pycache__`, `.next`, `dist`, `build`, `.venv`, `venv`
+
+Language detection is driven by a `LANGUAGE_MAP` in `services/scanner.py`.
+Adding new extensions requires no code changes outside that file.
+
+### Repository Dashboard
+
+Open http://localhost:3000/dashboard to:
+- Import a repository by local path
+- View scan status, file count, language distribution
+- Inspect per-language file counts with a visual bar
+- Delete a repository
 
 ---
 
