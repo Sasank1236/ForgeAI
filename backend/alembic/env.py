@@ -7,15 +7,17 @@ It imports models from the application so autogenerate can detect schema changes
 import asyncio
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
 
+from alembic import context
 from forgeai.config import get_settings
-from forgeai.database import Base  # noqa: F401 — imports all models via metadata
-
-# ─── Import all models so Alembic autogenerate can detect them ────────────────
-# Phase 2 models — registers repositories + repository_files tables
-from forgeai.models import Repository, RepositoryFile  # noqa: F401
+from forgeai.database import Base  # noqa: F401
+from forgeai.models import (  # noqa: F401
+    Import,
+    Repository,
+    RepositoryFile,
+    Symbol,
+)
 
 # ─── Alembic Config ───────────────────────────────────────────────────────────
 config = context.config
