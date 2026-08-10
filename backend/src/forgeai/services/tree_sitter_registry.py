@@ -61,7 +61,9 @@ class TreeSitterRegistry:
                 extensions=[".js", ".jsx", ".mjs", ".cjs"],
             )
         except Exception as err:
-            logger.warning("failed_to_load_grammar", language="javascript", error=str(err))
+            logger.warning(
+                "failed_to_load_grammar", language="javascript", error=str(err)
+            )
 
         # TypeScript
         try:
@@ -81,7 +83,9 @@ class TreeSitterRegistry:
                 extensions=[".tsx"],
             )
         except Exception as err:
-            logger.warning("failed_to_load_grammar", language="typescript", error=str(err))
+            logger.warning(
+                "failed_to_load_grammar", language="typescript", error=str(err)
+            )
 
         # Go
         try:

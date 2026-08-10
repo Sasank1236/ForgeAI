@@ -10,7 +10,8 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum as SAEnum, Integer, String, Text
+from sqlalchemy import DateTime, Integer, String, Text
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
@@ -21,10 +22,10 @@ from forgeai.database import Base
 class RepositoryStatus(str, enum.Enum):
     """Lifecycle states of a repository import."""
 
-    pending = "pending"      # Created, not yet scanned
-    scanning = "scanning"    # Scan in progress
-    ready = "ready"          # Scan complete, data available
-    error = "error"          # Scan failed
+    pending = "pending"  # Created, not yet scanned
+    scanning = "scanning"  # Scan in progress
+    ready = "ready"  # Scan complete, data available
+    error = "error"  # Scan failed
 
 
 class Repository(Base):
@@ -72,12 +73,8 @@ class Repository(Base):
     )
 
     # ── Git information (all optional) ────────────────────────────────────────
-    default_branch: Mapped[str | None] = mapped_column(
-        String(255), nullable=True
-    )
-    current_commit: Mapped[str | None] = mapped_column(
-        String(40), nullable=True
-    )
+    default_branch: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    current_commit: Mapped[str | None] = mapped_column(String(40), nullable=True)
     git_remote: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # ── Timestamps ────────────────────────────────────────────────────────────

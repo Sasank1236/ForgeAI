@@ -15,7 +15,7 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from forgeai.models.symbol import Symbol, SymbolType, Visibility
+from forgeai.models.symbol import Symbol, SymbolType
 
 logger = structlog.get_logger(__name__)
 
@@ -54,9 +54,7 @@ class SymbolRepo:
 
     async def get_by_id(self, symbol_id: UUID) -> Symbol | None:
         """Fetch a single symbol by its UUID primary key."""
-        result = await self._db.execute(
-            select(Symbol).where(Symbol.id == symbol_id)
-        )
+        result = await self._db.execute(select(Symbol).where(Symbol.id == symbol_id))
         return result.scalar_one_or_none()
 
     async def list_by_repo(
@@ -136,9 +134,7 @@ class SymbolRepo:
 
     async def delete_by_file(self, file_id: UUID) -> int:
         """Delete all symbol rows associated with a file."""
-        result = await self._db.execute(
-            delete(Symbol).where(Symbol.file_id == file_id)
-        )
+        result = await self._db.execute(delete(Symbol).where(Symbol.file_id == file_id))
         return result.rowcount
 
     async def count_by_repo(self, repo_id: UUID) -> int:

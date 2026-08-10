@@ -14,8 +14,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-
 # ── Request ───────────────────────────────────────────────────────────────────
+
 
 class ParseRequest(BaseModel):
     """Optional body for POST /api/v1/repositories/{id}/parse.
@@ -49,6 +49,7 @@ class ParseRequest(BaseModel):
 
 # ── Stats ─────────────────────────────────────────────────────────────────────
 
+
 class LanguageParseStats(BaseModel):
     """Parse statistics for a single language."""
 
@@ -81,6 +82,7 @@ class ParseStatsResponse(BaseModel):
 
 
 # ── Parse response ────────────────────────────────────────────────────────────
+
 
 class ParseResponse(BaseModel):
     """Returned after POST /api/v1/repositories/{id}/parse completes."""

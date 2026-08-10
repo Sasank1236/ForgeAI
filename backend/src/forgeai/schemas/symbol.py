@@ -16,8 +16,8 @@ from pydantic import BaseModel, Field
 
 from forgeai.models.symbol import SymbolType, Visibility
 
-
 # ── Response ──────────────────────────────────────────────────────────────────
+
 
 class SymbolResponse(BaseModel):
     """Full symbol record returned by the API."""
@@ -33,12 +33,8 @@ class SymbolResponse(BaseModel):
     # Position
     start_line: int = Field(..., description="1-based line where the symbol starts.")
     end_line: int = Field(..., description="1-based line where the symbol ends.")
-    start_column: int = Field(
-        0, description="0-based column where the symbol starts."
-    )
-    end_column: int = Field(
-        0, description="0-based column where the symbol ends."
-    )
+    start_column: int = Field(0, description="0-based column where the symbol starts.")
+    end_column: int = Field(0, description="0-based column where the symbol ends.")
 
     # Metadata
     visibility: Visibility | None = None
@@ -58,6 +54,7 @@ class SymbolListResponse(BaseModel):
 
 
 # ── Filter ────────────────────────────────────────────────────────────────────
+
 
 class SymbolFilter(BaseModel):
     """Query-parameter filters for GET /api/v1/repositories/{id}/symbols."""

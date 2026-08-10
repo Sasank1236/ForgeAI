@@ -8,10 +8,10 @@ Data access layer (DAL) objects are added here incrementally:
 
 # Phase 2
 from forgeai.repositories.file_repo import FileRepo
-from forgeai.repositories.repository_repo import RepositoryRepo
 
 # Phase 3
 from forgeai.repositories.import_repo import ImportRepo
+from forgeai.repositories.repository_repo import RepositoryRepo
 from forgeai.repositories.symbol_repo import SymbolRepo
 
 __all__ = [

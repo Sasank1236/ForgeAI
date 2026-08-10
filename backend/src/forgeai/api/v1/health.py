@@ -5,12 +5,11 @@ GET /api/v1/health
   Used for liveness/readiness probes and monitoring dashboards.
 """
 
+import redis.asyncio as redis
 import structlog
 from fastapi import APIRouter, Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-
-import redis.asyncio as redis
 
 from forgeai.database import get_db
 from forgeai.redis_client import get_redis

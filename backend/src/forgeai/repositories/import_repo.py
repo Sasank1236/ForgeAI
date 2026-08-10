@@ -54,9 +54,7 @@ class ImportRepo:
 
     async def get_by_id(self, import_id: UUID) -> Import | None:
         """Fetch a single import record by UUID primary key."""
-        result = await self._db.execute(
-            select(Import).where(Import.id == import_id)
-        )
+        result = await self._db.execute(select(Import).where(Import.id == import_id))
         return result.scalar_one_or_none()
 
     async def list_by_repo(
@@ -136,9 +134,7 @@ class ImportRepo:
 
     async def delete_by_file(self, file_id: UUID) -> int:
         """Delete all import records associated with a file."""
-        result = await self._db.execute(
-            delete(Import).where(Import.file_id == file_id)
-        )
+        result = await self._db.execute(delete(Import).where(Import.file_id == file_id))
         return result.rowcount
 
     async def count_by_repo(self, repo_id: UUID) -> int:

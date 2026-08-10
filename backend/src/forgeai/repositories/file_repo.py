@@ -135,8 +135,6 @@ class FileRepo:
         is provided for explicit bulk-delete without loading into memory.
         """
         result = await self._db.execute(
-            delete(RepositoryFile).where(
-                RepositoryFile.repository_id == repo_id
-            )
+            delete(RepositoryFile).where(RepositoryFile.repository_id == repo_id)
         )
         return result.rowcount

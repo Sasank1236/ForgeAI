@@ -32,21 +32,23 @@ if TYPE_CHECKING:
 
 # ── Enum ──────────────────────────────────────────────────────────────────────
 
+
 class ImportType(enum.StrEnum):
     """Kinds of import statements across supported languages."""
 
-    import_ = "import"                  # Python: import os
-    from_import = "from_import"         # Python: from os import path
-    require = "require"                 # JS: const x = require('x')
-    dynamic_import = "dynamic_import"   # JS: import('x')
-    include = "include"                 # C++: #include <stdio.h>
-    package = "package"                 # Java: package com.example
-    export = "export"                   # JS/TS: export { foo }
-    re_export = "re_export"             # JS/TS: export { foo } from './bar'
-    side_effect = "side_effect"         # JS: import './styles.css'
+    import_ = "import"  # Python: import os
+    from_import = "from_import"  # Python: from os import path
+    require = "require"  # JS: const x = require('x')
+    dynamic_import = "dynamic_import"  # JS: import('x')
+    include = "include"  # C++: #include <stdio.h>
+    package = "package"  # Java: package com.example
+    export = "export"  # JS/TS: export { foo }
+    re_export = "re_export"  # JS/TS: export { foo } from './bar'
+    side_effect = "side_effect"  # JS: import './styles.css'
 
 
 # ── Model ─────────────────────────────────────────────────────────────────────
+
 
 class Import(Base):
     """Represents an import or dependency statement in a source file.
@@ -83,9 +85,7 @@ class Import(Base):
         index=True,
     )
 
-    source_symbol: Mapped[str | None] = mapped_column(
-        String(500), nullable=True
-    )
+    source_symbol: Mapped[str | None] = mapped_column(String(500), nullable=True)
     target_module: Mapped[str] = mapped_column(Text, nullable=False)
 
     import_type: Mapped[ImportType] = mapped_column(

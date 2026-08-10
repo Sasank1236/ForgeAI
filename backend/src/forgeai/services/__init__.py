@@ -11,10 +11,10 @@ Business logic services are added here incrementally:
 """
 
 # Phase 2
+# Phase 3
+from forgeai.services.parser import ASTExtractor, CodeParserService
 from forgeai.services.repository_service import RepositoryService
 from forgeai.services.scanner import RepositoryScanner
-
-# Phase 3
 from forgeai.services.tree_sitter_registry import TreeSitterRegistry, registry
 
 __all__ = [
@@ -22,5 +22,6 @@ __all__ = [
     "RepositoryService",
     "TreeSitterRegistry",
     "registry",
+    "CodeParserService",
+    "ASTExtractor",
 ]
-

@@ -4,17 +4,17 @@ Defines the app instance, middleware, lifespan, and router registration.
 Run with: uvicorn src.forgeai.main:app --reload
 """
 
-from contextlib import asynccontextmanager
 from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from forgeai.api.v1 import health, repositories
 from forgeai.config import get_settings
 from forgeai.core.logging import configure_logging
 from forgeai.redis_client import close_redis_pool
-from forgeai.api.v1 import health, repositories
 
 settings = get_settings()
 configure_logging(debug=settings.app_debug)

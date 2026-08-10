@@ -10,8 +10,9 @@ Phase 2 — Repository Import & File Scanner
 from __future__ import annotations
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 # ── Revision identifiers ──────────────────────────────────────────────────────
 revision = "001"
@@ -98,9 +99,7 @@ def upgrade() -> None:
         sa.Column("parsed", sa.Boolean, nullable=False, server_default="false"),
         sa.Column("symbols_count", sa.Integer, nullable=False, server_default="0"),
         # Unique constraint: one path per repository
-        sa.UniqueConstraint(
-            "repository_id", "relative_path", name="uq_repo_file_path"
-        ),
+        sa.UniqueConstraint("repository_id", "relative_path", name="uq_repo_file_path"),
     )
 
     # ── Indexes ───────────────────────────────────────────────────────────────

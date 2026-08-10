@@ -18,15 +18,21 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from forgeai.database import get_db
+from forgeai.repositories.import_repo import ImportRepo
+from forgeai.repositories.symbol_repo import SymbolRepo
+from forgeai.schemas.import_ import ImportListResponse, ImportRecordResponse
+from forgeai.schemas.parser import ParseRequest, ParseResponse
 from forgeai.schemas.repository import (
-    FilesListResponse,
     FileResponse,
+    FilesListResponse,
     ImportRequest,
     ImportResponse,
     RepositoryListItem,
     RepositoryResponse,
     RepositoryStats,
 )
+from forgeai.schemas.symbol import SymbolListResponse, SymbolResponse
+from forgeai.services.parser import CodeParserService
 from forgeai.services.repository_service import RepositoryService
 
 logger = structlog.get_logger(__name__)
@@ -35,11 +41,13 @@ router = APIRouter(prefix="/repositories", tags=["Repositories"])
 
 # ── Helper ────────────────────────────────────────────────────────────────────
 
+
 def _get_service(db: AsyncSession = Depends(get_db)) -> RepositoryService:
     return RepositoryService(db)
 
 
 # ── POST /import ──────────────────────────────────────────────────────────────
+
 
 @router.post(
     "/import",
@@ -72,6 +80,7 @@ async def import_repository(
 
 
 # ── GET / ─────────────────────────────────────────────────────────────────────
+
 
 @router.get(
     "",
@@ -106,6 +115,7 @@ async def list_repositories(
 
 
 # ── GET /{id} ─────────────────────────────────────────────────────────────────
+
 
 @router.get(
     "/{repo_id}",
@@ -145,6 +155,7 @@ async def get_repository(
 
 # ── GET /{id}/files ───────────────────────────────────────────────────────────
 
+
 @router.get(
     "/{repo_id}/files",
     response_model=FilesListResponse,
@@ -168,9 +179,7 @@ async def list_files(
     from forgeai.repositories.file_repo import FileRepo
 
     file_repo = FileRepo(db)
-    files, total = await file_repo.list_by_repo(
-        repo_id, page=page, page_size=page_size
-    )
+    files, total = await file_repo.list_by_repo(repo_id, page=page, page_size=page_size)
 
     return FilesListResponse(
         items=[
@@ -198,6 +207,7 @@ async def list_files(
 
 # ── DELETE /{id} ──────────────────────────────────────────────────────────────
 
+
 @router.delete(
     "/{repo_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -215,3 +225,143 @@ async def delete_repository(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Repository {repo_id} not found.",
         )
+
+
+# ── POST /{id}/parse ──────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/{repo_id}/parse",
+    response_model=ParseResponse,
+    summary="Parse source files in a repository",
+    description="Extract symbols and imports from repository files using Tree-sitter AST parsing.",
+)
+async def parse_repository(
+    repo_id: uuid.UUID,
+    body: ParseRequest | None = None,
+    db: AsyncSession = Depends(get_db),
+) -> ParseResponse:
+    """Parse source files in a repository using Tree-sitter."""
+    parser_svc = CodeParserService(db)
+    try:
+        return await parser_svc.parse_repository(repo_id, body)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    except Exception as exc:
+        logger.error("parse_repository_failed", repo_id=str(repo_id), error=str(exc))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Repository parsing failed. Check server logs for details.",
+        ) from exc
+
+
+# ── GET /{id}/symbols ─────────────────────────────────────────────────────────
+
+
+@router.get(
+    "/{repo_id}/symbols",
+    response_model=SymbolListResponse,
+    summary="List code symbols in a repository",
+)
+async def list_symbols(
+    repo_id: uuid.UUID,
+    file_id: uuid.UUID | None = Query(default=None, description="Filter by file UUID"),
+    symbol_type: str | None = Query(
+        default=None, description="Filter by symbol type (e.g. function, class)"
+    ),
+    name_query: str | None = Query(
+        default=None, description="Case-insensitive name search"
+    ),
+    page: int = Query(default=1, ge=1, description="1-based page number"),
+    page_size: int = Query(default=50, ge=1, le=200, description="Items per page"),
+    db: AsyncSession = Depends(get_db),
+) -> SymbolListResponse:
+    """Return a paginated list of extracted code symbols."""
+    symbol_repo = SymbolRepo(db)
+    symbols, total = await symbol_repo.list_by_repo(
+        repo_id,
+        file_id=file_id,
+        symbol_type=symbol_type,
+        name_query=name_query,
+        page=page,
+        page_size=page_size,
+    )
+
+    return SymbolListResponse(
+        items=[
+            SymbolResponse(
+                id=s.id,
+                repository_id=s.repository_id,
+                file_id=s.file_id,
+                name=s.name,
+                symbol_type=s.symbol_type.value,
+                language=s.language,
+                parent_symbol_id=s.parent_symbol_id,
+                start_line=s.start_line,
+                end_line=s.end_line,
+                start_column=s.start_column,
+                end_column=s.end_column,
+                visibility=s.visibility.value if s.visibility else None,
+                signature=s.signature,
+                docstring=s.docstring,
+            )
+            for s in symbols
+        ],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+
+
+# ── GET /{id}/imports ─────────────────────────────────────────────────────────
+
+
+@router.get(
+    "/{repo_id}/imports",
+    response_model=ImportListResponse,
+    summary="List import dependencies in a repository",
+)
+async def list_imports(
+    repo_id: uuid.UUID,
+    file_id: uuid.UUID | None = Query(default=None, description="Filter by file UUID"),
+    import_type: str | None = Query(
+        default=None, description="Filter by import type (e.g. import, from_import)"
+    ),
+    module_query: str | None = Query(
+        default=None, description="Case-insensitive module search"
+    ),
+    page: int = Query(default=1, ge=1, description="1-based page number"),
+    page_size: int = Query(default=50, ge=1, le=200, description="Items per page"),
+    db: AsyncSession = Depends(get_db),
+) -> ImportListResponse:
+    """Return a paginated list of extracted import dependencies."""
+    import_repo = ImportRepo(db)
+    imports, total = await import_repo.list_by_repo(
+        repo_id,
+        file_id=file_id,
+        import_type=import_type,
+        module_query=module_query,
+        page=page,
+        page_size=page_size,
+    )
+
+    return ImportListResponse(
+        items=[
+            ImportRecordResponse(
+                id=imp.id,
+                repository_id=imp.repository_id,
+                file_id=imp.file_id,
+                source_symbol=imp.source_symbol,
+                target_module=imp.target_module,
+                import_type=imp.import_type.value,
+                alias=imp.alias,
+            )
+            for imp in imports
+        ],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )

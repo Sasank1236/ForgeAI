@@ -28,7 +28,7 @@ class RepositoryRepo:
         """Insert a new repository row in ``pending`` status."""
         repo = Repository(name=name, root_path=root_path)
         self._db.add(repo)
-        await self._db.flush()   # Assign id without committing
+        await self._db.flush()  # Assign id without committing
         logger.info("repo_created", repo_id=str(repo.id), name=name)
         return repo
 
@@ -79,9 +79,7 @@ class RepositoryRepo:
             values["git_remote"] = git_remote
 
         await self._db.execute(
-            update(Repository)
-            .where(Repository.id == repo_id)
-            .values(**values)
+            update(Repository).where(Repository.id == repo_id).values(**values)
         )
 
     async def delete(self, repo_id: UUID) -> bool:

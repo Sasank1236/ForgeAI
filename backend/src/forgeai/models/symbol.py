@@ -33,6 +33,7 @@ if TYPE_CHECKING:
 
 # ── Enums ─────────────────────────────────────────────────────────────────────
 
+
 class SymbolType(enum.StrEnum):
     """Kinds of code symbols that the parser can extract."""
 
@@ -60,6 +61,7 @@ class Visibility(enum.StrEnum):
 
 
 # ── Model ─────────────────────────────────────────────────────────────────────
+
 
 class Symbol(Base):
     """Represents a code symbol extracted from a source file.

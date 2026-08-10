@@ -18,7 +18,7 @@ import mimetypes
 import subprocess
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Final
 
@@ -122,59 +122,106 @@ LANGUAGE_MAP: Final[dict[str, str]] = {
 }
 
 # Extensions whose files are always considered "code" for statistics
-CODE_EXTENSIONS: Final[frozenset[str]] = frozenset({
-    ".py", ".pyi", ".pyx",
-    ".js", ".jsx", ".mjs", ".cjs",
-    ".ts", ".tsx", ".mts",
-    ".vue", ".svelte",
-    ".c", ".h", ".cpp", ".cc", ".cxx", ".hpp", ".hxx",
-    ".rs", ".go", ".zig",
-    ".java", ".kt", ".kts", ".groovy", ".scala",
-    ".swift", ".m", ".mm", ".dart",
-    ".rb", ".php", ".lua",
-    ".sh", ".bash", ".zsh", ".fish", ".ps1",
-    ".hs", ".ex", ".exs", ".erl", ".clj", ".ml", ".fs", ".fsx",
-    ".sql", ".r", ".jl",
-    ".tf", ".hcl", ".proto", ".graphql", ".gql",
-})
+CODE_EXTENSIONS: Final[frozenset[str]] = frozenset(
+    {
+        ".py",
+        ".pyi",
+        ".pyx",
+        ".js",
+        ".jsx",
+        ".mjs",
+        ".cjs",
+        ".ts",
+        ".tsx",
+        ".mts",
+        ".vue",
+        ".svelte",
+        ".c",
+        ".h",
+        ".cpp",
+        ".cc",
+        ".cxx",
+        ".hpp",
+        ".hxx",
+        ".rs",
+        ".go",
+        ".zig",
+        ".java",
+        ".kt",
+        ".kts",
+        ".groovy",
+        ".scala",
+        ".swift",
+        ".m",
+        ".mm",
+        ".dart",
+        ".rb",
+        ".php",
+        ".lua",
+        ".sh",
+        ".bash",
+        ".zsh",
+        ".fish",
+        ".ps1",
+        ".hs",
+        ".ex",
+        ".exs",
+        ".erl",
+        ".clj",
+        ".ml",
+        ".fs",
+        ".fsx",
+        ".sql",
+        ".r",
+        ".jl",
+        ".tf",
+        ".hcl",
+        ".proto",
+        ".graphql",
+        ".gql",
+    }
+)
 
 # Directories to skip during traversal.
 # Later phases can merge this with project-specific .gitignore entries.
-DEFAULT_IGNORE: Final[frozenset[str]] = frozenset({
-    ".git",
-    ".hg",
-    ".svn",
-    "node_modules",
-    "__pycache__",
-    ".pytest_cache",
-    ".mypy_cache",
-    ".ruff_cache",
-    ".next",
-    ".nuxt",
-    ".turbo",
-    "dist",
-    "build",
-    "out",
-    ".venv",
-    "venv",
-    "env",
-    ".tox",
-    "coverage",
-    ".coverage",
-    ".cache",
-    ".idea",
-    ".vscode",
-    "tmp",
-    "temp",
-    "logs",
-    ".DS_Store",
-})
+DEFAULT_IGNORE: Final[frozenset[str]] = frozenset(
+    {
+        ".git",
+        ".hg",
+        ".svn",
+        "node_modules",
+        "__pycache__",
+        ".pytest_cache",
+        ".mypy_cache",
+        ".ruff_cache",
+        ".next",
+        ".nuxt",
+        ".turbo",
+        "dist",
+        "build",
+        "out",
+        ".venv",
+        "venv",
+        "env",
+        ".tox",
+        "coverage",
+        ".coverage",
+        ".cache",
+        ".idea",
+        ".vscode",
+        "tmp",
+        "temp",
+        "logs",
+        ".DS_Store",
+    }
+)
 
 # Max bytes read when checking for binary content
 _BINARY_PROBE_BYTES: Final[int] = 8192
 
 
 # ── Data classes ──────────────────────────────────────────────────────────────
+
 
 @dataclass(slots=True)
 class ScannedFile:
@@ -214,6 +261,7 @@ class ScanResult:
 
 
 # ── Scanner ───────────────────────────────────────────────────────────────────
+
 
 class RepositoryScanner:
     """Recursively scans a local repository and collects file metadata.
@@ -289,13 +337,9 @@ class RepositoryScanner:
 
             is_binary = self._is_binary(entry, stat.st_size)
             mime_type = self._guess_mime(entry)
-            sha256, line_count = self._content_metrics(
-                entry, stat.st_size, is_binary
-            )
+            sha256, line_count = self._content_metrics(entry, stat.st_size, is_binary)
 
-            last_modified = datetime.fromtimestamp(
-                stat.st_mtime, tz=timezone.utc
-            )
+            last_modified = datetime.fromtimestamp(stat.st_mtime, tz=UTC)
 
             scanned.append(
                 ScannedFile(
@@ -426,9 +470,7 @@ class RepositoryScanner:
             except Exception:
                 return None
 
-        info["default_branch"] = _run(
-            ["git", "rev-parse", "--abbrev-ref", "HEAD"]
-        )
+        info["default_branch"] = _run(["git", "rev-parse", "--abbrev-ref", "HEAD"])
         info["current_commit"] = _run(["git", "rev-parse", "HEAD"])
         info["git_remote"] = _run(["git", "remote", "get-url", "origin"])
 

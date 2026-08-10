@@ -11,8 +11,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-
 # ── Request ───────────────────────────────────────────────────────────────────
+
 
 class ImportRequest(BaseModel):
     """Body for POST /api/v1/repositories/import."""
@@ -26,12 +26,15 @@ class ImportRequest(BaseModel):
 
 # ── Stats ─────────────────────────────────────────────────────────────────────
 
+
 class RepositoryStats(BaseModel):
     """Aggregate statistics computed after a repository scan."""
 
     total_files: int = Field(..., description="Total files discovered.")
     code_files: int = Field(..., description="Files with a recognised code extension.")
-    total_size_bytes: int = Field(..., description="Combined size of all files in bytes.")
+    total_size_bytes: int = Field(
+        ..., description="Combined size of all files in bytes."
+    )
     languages: dict[str, int] = Field(
         default_factory=dict,
         description="Map of language name → file count, sorted by count descending.",
@@ -40,6 +43,7 @@ class RepositoryStats(BaseModel):
 
 # ── Import response ───────────────────────────────────────────────────────────
 
+
 class ImportResponse(BaseModel):
     """Returned after POST /api/v1/repositories/import completes."""
 
@@ -47,10 +51,13 @@ class ImportResponse(BaseModel):
     status: str = Field(description="Repository status after the import.")
     files_scanned: int
     languages: dict[str, int]
-    scan_time_ms: int = Field(description="Wall-clock time of the scan in milliseconds.")
+    scan_time_ms: int = Field(
+        description="Wall-clock time of the scan in milliseconds."
+    )
 
 
 # ── Repository representations ────────────────────────────────────────────────
+
 
 class RepositoryResponse(BaseModel):
     """Full repository record including scan statistics."""
@@ -88,6 +95,7 @@ class RepositoryListItem(BaseModel):
 
 
 # ── File representations ──────────────────────────────────────────────────────
+
 
 class FileResponse(BaseModel):
     """Single file record returned by GET /api/v1/repositories/{id}/files."""

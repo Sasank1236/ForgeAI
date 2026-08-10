@@ -16,8 +16,8 @@ from pydantic import BaseModel, Field
 
 from forgeai.models.import_ import ImportType
 
-
 # ── Response ──────────────────────────────────────────────────────────────────
+
 
 class ImportRecordResponse(BaseModel):
     """Full import record returned by the API.
@@ -47,6 +47,7 @@ class ImportListResponse(BaseModel):
 
 
 # ── Filter ────────────────────────────────────────────────────────────────────
+
 
 class ImportFilter(BaseModel):
     """Query-parameter filters for GET /api/v1/repositories/{id}/imports."""

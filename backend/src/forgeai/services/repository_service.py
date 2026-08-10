@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import structlog
@@ -105,7 +105,7 @@ class RepositoryService:
             await self._repo_repo.update_status(
                 repo.id,
                 RepositoryStatus.ready,
-                last_scanned=datetime.now(tz=timezone.utc),
+                last_scanned=datetime.now(tz=UTC),
                 increment_scan_version=bool(existing),
                 default_branch=git.get("default_branch"),
                 current_commit=git.get("current_commit"),
