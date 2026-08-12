@@ -18,6 +18,7 @@ import {
   Plus,
   GitCommit,
   Globe,
+  Cpu,
 } from "lucide-react";
 import {
   importRepository,
@@ -25,6 +26,7 @@ import {
   deleteRepository,
 } from "@/lib/api";
 import type { RepositoryListItem, ImportResponse } from "@/types/repository";
+import { SymbolExplorer } from "./SymbolExplorer";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -179,10 +181,12 @@ function RepoCard({
   repo,
   onDelete,
   deleting,
+  onExploreSymbols,
 }: {
   repo: RepositoryListItem;
   onDelete: (id: string) => void;
   deleting: boolean;
+  onExploreSymbols?: (repo: RepositoryListItem) => void;
 }) {
   const stats = repo.stats;
   const langTotal = stats
@@ -300,6 +304,21 @@ function RepoCard({
       {/* Language bar */}
       {stats && Object.keys(stats.languages).length > 0 && (
         <LanguageBar languages={stats.languages} total={langTotal} />
+      )}
+
+      {/* Code Intelligence Action */}
+      {repo.status === "ready" && onExploreSymbols && (
+        <button
+          className="btn btn-secondary text-xs w-full py-1.5 flex items-center justify-center gap-1.5 mt-1"
+          onClick={() => onExploreSymbols(repo)}
+          style={{
+            borderColor: "var(--color-brand-800)",
+            color: "var(--color-brand-300)",
+          }}
+        >
+          <Cpu size={13} />
+          Explore AST Symbols & Imports
+        </button>
       )}
 
       {/* Footer */}
@@ -521,12 +540,13 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedExplorerRepo, setSelectedExplorerRepo] = useState<RepositoryListItem | null>(null);
 
   const fetchRepos = useCallback(async () => {
     try {
-      setFetchError(null);
       const data = await listRepositories();
       setRepos(data);
+      setFetchError(null);
     } catch {
       setFetchError("Could not reach the backend. Is the server running?");
     } finally {
@@ -535,10 +555,26 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    fetchRepos();
-  }, [fetchRepos]);
+    let isMounted = true;
+    listRepositories()
+      .then((data) => {
+        if (isMounted) {
+          setRepos(data);
+          setFetchError(null);
+        }
+      })
+      .catch(() => {
+        if (isMounted) setFetchError("Could not reach the backend. Is the server running?");
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
-  const handleImportSuccess = useCallback(async (_res: ImportResponse) => {
+  const handleImportSuccess = useCallback(async () => {
     await fetchRepos();
   }, [fetchRepos]);
 
@@ -550,13 +586,16 @@ export default function DashboardPage() {
       try {
         await deleteRepository(id);
         setRepos((prev) => prev.filter((r) => r.id !== id));
+        if (selectedExplorerRepo?.id === id) {
+          setSelectedExplorerRepo(null);
+        }
       } catch {
         alert("Delete failed — check server logs.");
       } finally {
         setDeletingId(null);
       }
     },
-    [repos]
+    [repos, selectedExplorerRepo]
   );
 
   return (
@@ -595,6 +634,16 @@ export default function DashboardPage() {
       <div className="mb-8">
         <ImportPanel onSuccess={handleImportSuccess} />
       </div>
+
+      {/* ── Symbol Explorer Section (if selected) ────────────────────────── */}
+      {selectedExplorerRepo && (
+        <div className="mb-8">
+          <SymbolExplorer
+            repo={selectedExplorerRepo}
+            onClose={() => setSelectedExplorerRepo(null)}
+          />
+        </div>
+      )}
 
       {/* ── Repository list ──────────────────────────────────────────────── */}
       {fetchError ? (
@@ -680,6 +729,7 @@ export default function DashboardPage() {
                 repo={repo}
                 onDelete={handleDelete}
                 deleting={deletingId === repo.id}
+                onExploreSymbols={(r) => setSelectedExplorerRepo(r)}
               />
             ))}
           </div>

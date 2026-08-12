@@ -47,8 +47,11 @@ export default function DashboardShell({
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // Close mobile drawer on route change
-  useEffect(() => { setMobileOpen(false); }, [pathname]);
+  const [currentPath, setCurrentPath] = useState(pathname);
+  if (currentPath !== pathname) {
+    setCurrentPath(pathname);
+    setMobileOpen(false);
+  }
 
   // ── Keyboard shortcut: Ctrl+B ─────────────────────────────────────────────
   useEffect(() => {
