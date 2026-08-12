@@ -19,6 +19,7 @@ import {
   GitCommit,
   Globe,
   Cpu,
+  Database,
 } from "lucide-react";
 import {
   importRepository,
@@ -27,6 +28,7 @@ import {
 } from "@/lib/api";
 import type { RepositoryListItem, ImportResponse } from "@/types/repository";
 import { SymbolExplorer } from "./SymbolExplorer";
+import { KnowledgeBaseCard } from "./KnowledgeBaseCard";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -182,11 +184,13 @@ function RepoCard({
   onDelete,
   deleting,
   onExploreSymbols,
+  onIndexRepo,
 }: {
   repo: RepositoryListItem;
   onDelete: (id: string) => void;
   deleting: boolean;
   onExploreSymbols?: (repo: RepositoryListItem) => void;
+  onIndexRepo?: (repo: RepositoryListItem) => void;
 }) {
   const stats = repo.stats;
   const langTotal = stats
@@ -306,19 +310,37 @@ function RepoCard({
         <LanguageBar languages={stats.languages} total={langTotal} />
       )}
 
-      {/* Code Intelligence Action */}
-      {repo.status === "ready" && onExploreSymbols && (
-        <button
-          className="btn btn-secondary text-xs w-full py-1.5 flex items-center justify-center gap-1.5 mt-1"
-          onClick={() => onExploreSymbols(repo)}
-          style={{
-            borderColor: "var(--color-brand-800)",
-            color: "var(--color-brand-300)",
-          }}
-        >
-          <Cpu size={13} />
-          Explore AST Symbols & Imports
-        </button>
+      {/* Code Intelligence & Knowledge Base Actions */}
+      {repo.status === "ready" && (
+        <div className="flex flex-col gap-1.5 mt-1">
+          {onExploreSymbols && (
+            <button
+              className="btn btn-secondary text-xs w-full py-1.5 flex items-center justify-center gap-1.5"
+              onClick={() => onExploreSymbols(repo)}
+              style={{
+                borderColor: "var(--color-brand-800)",
+                color: "var(--color-brand-300)",
+              }}
+            >
+              <Cpu size={13} />
+              Explore AST Symbols & Imports
+            </button>
+          )}
+
+          {onIndexRepo && (
+            <button
+              className="btn btn-secondary text-xs w-full py-1.5 flex items-center justify-center gap-1.5"
+              onClick={() => onIndexRepo(repo)}
+              style={{
+                borderColor: "hsl(142, 72%, 44%, 0.3)",
+                color: "hsl(142, 72%, 44%)",
+              }}
+            >
+              <Database size={13} />
+              Vector Knowledge Base (1536-dim)
+            </button>
+          )}
+        </div>
       )}
 
       {/* Footer */}
@@ -541,6 +563,7 @@ export default function DashboardPage() {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedExplorerRepo, setSelectedExplorerRepo] = useState<RepositoryListItem | null>(null);
+  const [selectedIndexRepo, setSelectedIndexRepo] = useState<RepositoryListItem | null>(null);
 
   const fetchRepos = useCallback(async () => {
     try {
@@ -589,13 +612,16 @@ export default function DashboardPage() {
         if (selectedExplorerRepo?.id === id) {
           setSelectedExplorerRepo(null);
         }
+        if (selectedIndexRepo?.id === id) {
+          setSelectedIndexRepo(null);
+        }
       } catch {
         alert("Delete failed — check server logs.");
       } finally {
         setDeletingId(null);
       }
     },
-    [repos, selectedExplorerRepo]
+    [repos, selectedExplorerRepo, selectedIndexRepo]
   );
 
   return (
@@ -641,6 +667,16 @@ export default function DashboardPage() {
           <SymbolExplorer
             repo={selectedExplorerRepo}
             onClose={() => setSelectedExplorerRepo(null)}
+          />
+        </div>
+      )}
+
+      {/* ── Knowledge Base Indexing Section (if selected) ───────────────── */}
+      {selectedIndexRepo && (
+        <div className="mb-8">
+          <KnowledgeBaseCard
+            repo={selectedIndexRepo}
+            onClose={() => setSelectedIndexRepo(null)}
           />
         </div>
       )}
@@ -730,6 +766,7 @@ export default function DashboardPage() {
                 onDelete={handleDelete}
                 deleting={deletingId === repo.id}
                 onExploreSymbols={(r) => setSelectedExplorerRepo(r)}
+                onIndexRepo={(r) => setSelectedIndexRepo(r)}
               />
             ))}
           </div>
