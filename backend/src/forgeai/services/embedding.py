@@ -1,7 +1,7 @@
 """Embedding generation service.
 
-Generates 1536-dimensional vector embeddings using OpenAI / LiteLLM text-embedding-3-small model.
-Handles text batching, rate limits, and fallback deterministic mock vector generation when offline/unconfigured.
+Generates 1536-dimensional vector embeddings using OpenAI / LiteLLM models.
+Handles text batching, rate limits, and fallback deterministic mock vector generation.
 
 Phase 4 — Vector Embeddings & Knowledge Base
 """
@@ -84,7 +84,8 @@ class EmbeddingService:
             val = (hash(text_bytes + str(i).encode("utf-8")) % 10000) / 5000.0 - 1.0
             vector.append(val)
 
-        # L2 Normalize the vector so cosine similarity calculations match real embeddings
+        # L2 Normalize the vector so cosine similarity calculations match
+        # real embeddings
         norm = math.sqrt(sum(x * x for x in vector))
         if norm > 0:
             vector = [x / norm for x in vector]

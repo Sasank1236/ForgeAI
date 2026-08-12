@@ -78,11 +78,16 @@ class KnowledgeBaseService:
         # If force_reindex, delete existing embeddings
         if req.force_reindex:
             deleted_count = await self._embedding_repo.delete_by_repo(repo_id)
-            logger.info("knowledge_base_index_cleared", repo_id=str(repo_id), deleted=deleted_count)
+            logger.info(
+                "knowledge_base_index_cleared",
+                repo_id=str(repo_id),
+                deleted=deleted_count,
+            )
 
         # List all files for repository
-        files, _ = await self._file_repo.list_by_repo(repo_id, page=1, page_size=10000)
-        repo_path = Path(repo.root_path)
+        files, _ = await self._file_repo.list_by_repo(
+            repo_id, page=1, page_size=10000
+        )
 
         total_chunks = 0
         total_embedded_files = 0
@@ -134,7 +139,7 @@ class KnowledgeBaseService:
 
             total_embedded_files += 1
 
-            for chunk, vec in zip(chunks, vectors):
+            for chunk, vec in zip(chunks, vectors, strict=False):
                 total_chunks += 1
                 total_tokens += chunk.token_count
 
