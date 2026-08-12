@@ -20,6 +20,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from forgeai.database import get_db
 from forgeai.repositories.import_repo import ImportRepo
 from forgeai.repositories.symbol_repo import SymbolRepo
+from forgeai.schemas.embedding import (
+    IndexRequest,
+    IndexResponse,
+    IndexStatsResponse,
+    SearchRequest,
+    SearchResponse,
+)
 from forgeai.schemas.import_ import ImportListResponse, ImportRecordResponse
 from forgeai.schemas.parser import ParseRequest, ParseResponse
 from forgeai.schemas.repository import (
@@ -32,6 +39,7 @@ from forgeai.schemas.repository import (
     RepositoryStats,
 )
 from forgeai.schemas.symbol import SymbolListResponse, SymbolResponse
+from forgeai.services.knowledge_base import KnowledgeBaseService
 from forgeai.services.parser import CodeParserService
 from forgeai.services.repository_service import RepositoryService
 
@@ -365,3 +373,112 @@ async def list_imports(
         page=page,
         page_size=page_size,
     )
+
+
+# ── POST /{id}/index ─────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/{repo_id}/index",
+    response_model=IndexResponse,
+    summary="Index repository into vector embeddings",
+    description="Chunk repository files and generate 1536-dim vector embeddings.",
+)
+async def index_repository(
+    repo_id: uuid.UUID,
+    body: IndexRequest | None = None,
+    db: AsyncSession = Depends(get_db),
+) -> IndexResponse:
+    """Index repository files into vector embeddings."""
+    kb_svc = KnowledgeBaseService(db)
+    try:
+        return await kb_svc.index_repository(repo_id, body)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    except Exception as exc:
+        logger.error("index_repository_failed", repo_id=str(repo_id), error=str(exc))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Repository indexing failed. Check server logs for details.",
+        ) from exc
+
+
+# ── GET /{id}/index/stats ───────────────────────────────────────────────────
+
+
+@router.get(
+    "/{repo_id}/index/stats",
+    response_model=IndexStatsResponse,
+    summary="Get repository vector index stats",
+)
+async def get_index_stats(
+    repo_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+) -> IndexStatsResponse:
+    """Fetch vector index statistics for a repository."""
+    kb_svc = KnowledgeBaseService(db)
+    try:
+        return await kb_svc.get_index_stats(repo_id)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+
+
+# ── DELETE /{id}/index ───────────────────────────────────────────────────────
+
+
+@router.delete(
+    "/{repo_id}/index",
+    status_code=status.HTTP_200_OK,
+    summary="Clear repository vector index",
+)
+async def clear_index(
+    repo_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, int]:
+    """Delete all vector embeddings for a repository."""
+    kb_svc = KnowledgeBaseService(db)
+    deleted = await kb_svc.clear_index(repo_id)
+    return {"deleted": deleted}
+
+
+# ── POST /{id}/search ────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/{repo_id}/search",
+    response_model=SearchResponse,
+    summary="Semantic vector search",
+    description="Perform cosine similarity vector search against indexed code chunks.",
+)
+async def search_repository(
+    repo_id: uuid.UUID,
+    body: SearchRequest,
+    db: AsyncSession = Depends(get_db),
+) -> SearchResponse:
+    """Semantic vector search against repository knowledge base."""
+    kb_svc = KnowledgeBaseService(db)
+    try:
+        results = await kb_svc.search_similar(
+            repo_id=repo_id,
+            query=body.query,
+            limit=body.limit,
+            min_similarity=body.min_similarity,
+        )
+        return SearchResponse(
+            query=body.query,
+            total=len(results),
+            results=results,
+        )
+    except Exception as exc:
+        logger.error("search_repository_failed", repo_id=str(repo_id), error=str(exc))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Semantic search failed. Check server logs for details.",
+        ) from exc
+
