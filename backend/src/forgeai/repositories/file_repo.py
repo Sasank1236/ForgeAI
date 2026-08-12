@@ -24,6 +24,25 @@ class FileRepo:
     def __init__(self, db: AsyncSession) -> None:
         self._db = db
 
+    async def get_by_id(self, file_id: UUID) -> RepositoryFile | None:
+        """Fetch a single RepositoryFile by UUID."""
+        result = await self._db.execute(
+            select(RepositoryFile).where(RepositoryFile.id == file_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def get_by_path(
+        self, repo_id: UUID, relative_path: str
+    ) -> RepositoryFile | None:
+        """Fetch a single RepositoryFile by repository ID and relative path."""
+        result = await self._db.execute(
+            select(RepositoryFile).where(
+                RepositoryFile.repository_id == repo_id,
+                RepositoryFile.relative_path == relative_path,
+            )
+        )
+        return result.scalar_one_or_none()
+
     async def bulk_insert(self, rows: list[dict]) -> int:
         """Insert a batch of file rows, ignoring duplicates.
 

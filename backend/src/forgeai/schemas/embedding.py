@@ -15,7 +15,9 @@ class IndexRequest(BaseModel):
 
     force_reindex: bool = Field(
         default=False,
-        description="Whether to clear existing vector index and perform full re-indexing.",
+        description=(
+            "Whether to clear existing vector index and perform full re-indexing."
+        ),
     )
     chunk_size: int = Field(
         default=512,
@@ -31,7 +33,9 @@ class IndexRequest(BaseModel):
     )
     languages: list[str] | None = Field(
         default=None,
-        description="Optional subset of languages to index (e.g. ['Python', 'TypeScript']).",
+        description=(
+            "Optional subset of languages to index (e.g. ['Python', 'TypeScript'])."
+        ),
     )
 
 
@@ -82,7 +86,39 @@ class EmbeddingSearchResult(BaseModel):
     end_line: int
     token_count: int
     similarity: float = Field(
-        ge=0.0,
+        ge=-1.0,
         le=1.0,
-        description="Cosine similarity score (0.0 = orthogonal/opposite, 1.0 = identical).",
+        description=(
+            "Cosine similarity score (-1.0 = opposite, 0.0 = orthogonal, 1.0 = identical)."
+        ),
     )
+
+
+class SearchRequest(BaseModel):
+    """Request payload for semantic vector similarity search."""
+
+    query: str = Field(
+        min_length=1,
+        description="Natural language or code snippet search query string.",
+    )
+    limit: int = Field(
+        default=10,
+        ge=1,
+        le=100,
+        description="Maximum number of search results to return.",
+    )
+    min_similarity: float = Field(
+        default=0.0,
+        ge=-1.0,
+        le=1.0,
+        description="Minimum cosine similarity score threshold.",
+    )
+
+
+class SearchResponse(BaseModel):
+    """API response wrapper for semantic vector search results."""
+
+    query: str
+    total: int
+    results: list[EmbeddingSearchResult]
+

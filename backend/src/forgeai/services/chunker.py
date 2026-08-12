@@ -84,7 +84,8 @@ class CodeChunker:
         target_size = chunk_size or self.default_chunk_size
         target_overlap = overlap or self.default_overlap
 
-        # If symbols are available and file has extracted functions/classes, use AST chunking
+        # If symbols are available and file has extracted functions/classes,
+        # use AST chunking
         if symbols and len(symbols) > 0:
             ast_chunks = self._chunk_by_symbols(
                 repo_id=repo_id,
@@ -156,7 +157,10 @@ class CodeChunker:
             sym_body = "\n".join(sym_lines)
 
             # Context-rich header snippet
-            header_info = f"// Symbol: {sym.symbol_type.value} {sym.name} in {relative_path}:{sym.start_line}"
+            header_info = (
+                f"// Symbol: {sym.symbol_type.value} {sym.name} "
+                f"in {relative_path}:{sym.start_line}"
+            )
             if sym.signature:
                 header_info += f"\n// Signature: {sym.signature}"
 
@@ -215,7 +219,6 @@ class CodeChunker:
         if not lines:
             return chunks
 
-        step = max(1, chunk_size - overlap)
         line_idx = 0
         current_chunk_idx = start_index
 
@@ -240,7 +243,9 @@ class CodeChunker:
                 end_line_idx = line_idx + 1
 
             text_body = "\n".join(accumulated)
-            header = f"// File: {relative_path} (Lines {start_line_offset + line_idx}-{start_line_offset + end_line_idx - 1})\n"
+            start_l = start_line_offset + line_idx
+            end_l = start_line_offset + end_line_idx - 1
+            header = f"// File: {relative_path} (Lines {start_l}-{end_l})\n"
             full_text = header + text_body
 
             chunks.append(

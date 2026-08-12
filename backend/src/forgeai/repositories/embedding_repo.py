@@ -88,8 +88,31 @@ class EmbeddingRepo:
         """
         limit = min(limit, 100)
 
-        # Distance calculation via pgvector: distance = embedding.cosine_distance(query_vector)
-        # Similarity = 1.0 - distance
+        # Check database dialect to support SQLite unit tests gracefully
+        dialect_name = self._db.bind.dialect.name if self._db.bind else ""
+        if dialect_name == "sqlite":
+            stmt = (
+                select(CodeEmbedding, RepositoryFile)
+                .join(RepositoryFile, CodeEmbedding.file_id == RepositoryFile.id)
+                .where(CodeEmbedding.repository_id == repo_id)
+            )
+            result = await self._db.execute(stmt)
+            rows = result.all()
+
+            scored_hits: list[tuple[CodeEmbedding, RepositoryFile, float]] = []
+            for emb, file in rows:
+                vec = emb.embedding
+                if isinstance(vec, list) and len(vec) == len(query_vector):
+                    sim = sum(a * b for a, b in zip(vec, query_vector, strict=False))
+                else:
+                    sim = 0.0
+                if sim >= min_similarity:
+                    scored_hits.append((emb, file, float(sim)))
+
+            scored_hits.sort(key=lambda x: x[2], reverse=True)
+            return scored_hits[:limit]
+
+        # PostgreSQL distance calculation via pgvector
         distance_expr = CodeEmbedding.embedding.cosine_distance(query_vector)
         similarity_expr = (1.0 - distance_expr).label("similarity")
 
@@ -104,7 +127,6 @@ class EmbeddingRepo:
         result = await self._db.execute(stmt)
         rows = result.all()
 
-        # Filter by min_similarity threshold if specified
         hits: list[tuple[CodeEmbedding, RepositoryFile, float]] = []
         for emb, file, sim in rows:
             sim_score = float(sim) if sim is not None else 0.0
