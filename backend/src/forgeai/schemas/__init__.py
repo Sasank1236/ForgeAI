@@ -3,23 +3,13 @@
 Pydantic DTOs (Data Transfer Objects) are added here incrementally:
   Phase 2: repository.py  ✓
   Phase 3: symbol.py, import_.py, parser.py  ✓
+  Phase 4: embedding.py   ✓
   Phase 5: search.py
   Phase 6: chat.py
   Phase 7: plan.py
 """
 
 # Phase 2
-from forgeai.schemas.import_ import (
-    ImportFilter,
-    ImportListResponse,
-    ImportRecordResponse,
-)
-from forgeai.schemas.parser import (
-    LanguageParseStats,
-    ParseRequest,
-    ParseResponse,
-    ParseStatsResponse,
-)
 from forgeai.schemas.repository import (
     FileResponse,
     FilesListResponse,
@@ -31,10 +21,30 @@ from forgeai.schemas.repository import (
 )
 
 # Phase 3
+from forgeai.schemas.import_ import (
+    ImportFilter,
+    ImportListResponse,
+    ImportRecordResponse,
+)
+from forgeai.schemas.parser import (
+    LanguageParseStats,
+    ParseRequest,
+    ParseResponse,
+    ParseStatsResponse,
+)
 from forgeai.schemas.symbol import (
     SymbolFilter,
     SymbolListResponse,
     SymbolResponse,
+)
+
+# Phase 4
+from forgeai.schemas.embedding import (
+    ChunkInfo,
+    EmbeddingSearchResult,
+    IndexRequest,
+    IndexResponse,
+    IndexStatsResponse,
 )
 
 __all__ = [
@@ -59,4 +69,10 @@ __all__ = [
     "ParseResponse",
     "ParseStatsResponse",
     "LanguageParseStats",
+    # Phase 4 — embedding
+    "ChunkInfo",
+    "EmbeddingSearchResult",
+    "IndexRequest",
+    "IndexResponse",
+    "IndexStatsResponse",
 ]
