@@ -23,11 +23,15 @@ import type {
   IndexResponse,
   IndexStatsResponse,
 } from "@/types/embedding";
+import type {
+  SearchQueryRequest,
+  SearchResponse,
+} from "@/types/search";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1",
   headers: { "Content-Type": "application/json" },
-  timeout: 120_000, // 2 min — large repos can take a while to scan/index
+  timeout: 120_000, // 2 min — large repos can take a while to scan/index/search
 });
 
 // ── Repository endpoints ──────────────────────────────────────────────────────
@@ -136,6 +140,20 @@ export async function getIndexStats(
 export async function clearIndex(repoId: string): Promise<{ deleted: number }> {
   const { data } = await api.delete<{ deleted: number }>(
     `/repositories/${repoId}/index`
+  );
+  return data;
+}
+
+// ── Phase 5: Multi-Modal Search Endpoints ────────────────────────────────────
+
+/** Perform semantic, keyword, symbol, or RRF hybrid search over code. */
+export async function searchRepository(
+  repoId: string,
+  request: SearchQueryRequest
+): Promise<SearchResponse> {
+  const { data } = await api.post<SearchResponse>(
+    `/repositories/${repoId}/search`,
+    request
   );
   return data;
 }
