@@ -24,8 +24,6 @@ from forgeai.schemas.embedding import (
     IndexRequest,
     IndexResponse,
     IndexStatsResponse,
-    SearchRequest,
-    SearchResponse,
 )
 from forgeai.schemas.import_ import ImportListResponse, ImportRecordResponse
 from forgeai.schemas.parser import ParseRequest, ParseResponse
@@ -38,10 +36,16 @@ from forgeai.schemas.repository import (
     RepositoryResponse,
     RepositoryStats,
 )
+from forgeai.schemas.search import (
+    SearchQueryRequest,
+    SearchResponse,
+    SearchType,
+)
 from forgeai.schemas.symbol import SymbolListResponse, SymbolResponse
 from forgeai.services.knowledge_base import KnowledgeBaseService
 from forgeai.services.parser import CodeParserService
 from forgeai.services.repository_service import RepositoryService
+from forgeai.services.search import SearchService
 
 logger = structlog.get_logger(__name__)
 router = APIRouter(prefix="/repositories", tags=["Repositories"])
@@ -453,32 +457,69 @@ async def clear_index(
 @router.post(
     "/{repo_id}/search",
     response_model=SearchResponse,
-    summary="Semantic vector search",
-    description="Perform cosine similarity vector search against indexed code chunks.",
+    summary="Multi-modal repository code search",
+    description="Perform semantic, keyword, symbol, or RRF hybrid search over repository code.",
 )
 async def search_repository(
     repo_id: uuid.UUID,
-    body: SearchRequest,
+    body: SearchQueryRequest,
     db: AsyncSession = Depends(get_db),
 ) -> SearchResponse:
-    """Semantic vector search against repository knowledge base."""
-    kb_svc = KnowledgeBaseService(db)
+    """Multi-modal search (hybrid RRF, semantic, keyword, symbol)."""
+    search_svc = SearchService(db)
     try:
-        results = await kb_svc.search_similar(
-            repo_id=repo_id,
-            query=body.query,
-            limit=body.limit,
-            min_similarity=body.min_similarity,
-        )
-        return SearchResponse(
-            query=body.query,
-            total=len(results),
-            results=results,
-        )
+        return await search_svc.search(repo_id, body)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
     except Exception as exc:
         logger.error("search_repository_failed", repo_id=str(repo_id), error=str(exc))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Semantic search failed. Check server logs for details.",
+            detail="Code search failed. Check server logs for details.",
+        ) from exc
+
+
+# ── GET /{id}/search ─────────────────────────────────────────────────────────
+
+
+@router.get(
+    "/{repo_id}/search",
+    response_model=SearchResponse,
+    summary="Multi-modal search (GET query params)",
+)
+async def search_repository_get(
+    repo_id: uuid.UUID,
+    q: str = Query(..., min_length=1, description="Search query string"),
+    type: str = Query(default="hybrid", description="Search type: hybrid, semantic, keyword, symbol"),
+    limit: int = Query(default=10, ge=1, le=100, description="Max results"),
+    min_score: float = Query(default=0.0, ge=0.0, le=1.0, description="Min score filter"),
+    language: str | None = Query(default=None, description="Language filter"),
+    extension: str | None = Query(default=None, description="Extension filter"),
+    db: AsyncSession = Depends(get_db),
+) -> SearchResponse:
+    """GET query-params endpoint for multi-modal code search."""
+    search_svc = SearchService(db)
+    try:
+        search_type_enum = SearchType(type.lower())
+    except ValueError:
+        search_type_enum = SearchType.hybrid
+
+    req = SearchQueryRequest(
+        query=q,
+        search_type=search_type_enum,
+        limit=limit,
+        min_score=min_score,
+        language=language,
+        extension=extension,
+    )
+    try:
+        return await search_svc.search(repo_id, req)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
         ) from exc
 
