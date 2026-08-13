@@ -4,7 +4,7 @@ Pydantic DTOs (Data Transfer Objects) are added here incrementally:
   Phase 2: repository.py  ✓
   Phase 3: symbol.py, import_.py, parser.py  ✓
   Phase 4: embedding.py   ✓
-  Phase 5: search.py
+  Phase 5: search.py      ✓
   Phase 6: chat.py
   Phase 7: plan.py
 """
@@ -47,6 +47,14 @@ from forgeai.schemas.embedding import (
     IndexStatsResponse,
 )
 
+# Phase 5
+from forgeai.schemas.search import (
+    SearchQueryRequest,
+    SearchResponse,
+    SearchResultItem,
+    SearchType,
+)
+
 __all__ = [
     # Phase 2
     "ImportRequest",
@@ -75,4 +83,9 @@ __all__ = [
     "IndexRequest",
     "IndexResponse",
     "IndexStatsResponse",
+    # Phase 5 — search
+    "SearchQueryRequest",
+    "SearchResponse",
+    "SearchResultItem",
+    "SearchType",
 ]
