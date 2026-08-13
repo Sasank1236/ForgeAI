@@ -211,7 +211,7 @@ async def test_phase4_api_endpoints(
         )
         assert search_resp.status_code == 200
         search_json = search_resp.json()
-        assert search_json["total"] > 0
+        assert search_json["total_hits"] > 0
         assert search_json["results"][0]["relative_path"] == "service.py"
 
         # 4. DELETE /api/v1/repositories/{id}/index
