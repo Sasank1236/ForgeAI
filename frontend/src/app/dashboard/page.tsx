@@ -20,6 +20,7 @@ import {
   Globe,
   Cpu,
   Database,
+  Compass,
 } from "lucide-react";
 import {
   importRepository,
@@ -29,6 +30,7 @@ import {
 import type { RepositoryListItem, ImportResponse } from "@/types/repository";
 import { SymbolExplorer } from "./SymbolExplorer";
 import { KnowledgeBaseCard } from "./KnowledgeBaseCard";
+import { SearchExplorer } from "./SearchExplorer";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -185,12 +187,14 @@ function RepoCard({
   deleting,
   onExploreSymbols,
   onIndexRepo,
+  onSearchRepo,
 }: {
   repo: RepositoryListItem;
   onDelete: (id: string) => void;
   deleting: boolean;
   onExploreSymbols?: (repo: RepositoryListItem) => void;
   onIndexRepo?: (repo: RepositoryListItem) => void;
+  onSearchRepo?: (repo: RepositoryListItem) => void;
 }) {
   const stats = repo.stats;
   const langTotal = stats
@@ -338,6 +342,20 @@ function RepoCard({
             >
               <Database size={13} />
               Vector Knowledge Base (1536-dim)
+            </button>
+          )}
+
+          {onSearchRepo && (
+            <button
+              className="btn btn-secondary text-xs w-full py-1.5 flex items-center justify-center gap-1.5"
+              onClick={() => onSearchRepo(repo)}
+              style={{
+                borderColor: "hsl(217, 91%, 60%, 0.3)",
+                color: "hsl(217, 91%, 60%)",
+              }}
+            >
+              <Compass size={13} />
+              Search Codebase (Multi-Modal)
             </button>
           )}
         </div>
@@ -564,6 +582,7 @@ export default function DashboardPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedExplorerRepo, setSelectedExplorerRepo] = useState<RepositoryListItem | null>(null);
   const [selectedIndexRepo, setSelectedIndexRepo] = useState<RepositoryListItem | null>(null);
+  const [selectedSearchRepo, setSelectedSearchRepo] = useState<RepositoryListItem | null>(null);
 
   const fetchRepos = useCallback(async () => {
     try {
@@ -615,13 +634,16 @@ export default function DashboardPage() {
         if (selectedIndexRepo?.id === id) {
           setSelectedIndexRepo(null);
         }
+        if (selectedSearchRepo?.id === id) {
+          setSelectedSearchRepo(null);
+        }
       } catch {
         alert("Delete failed — check server logs.");
       } finally {
         setDeletingId(null);
       }
     },
-    [repos, selectedExplorerRepo, selectedIndexRepo]
+    [repos, selectedExplorerRepo, selectedIndexRepo, selectedSearchRepo]
   );
 
   return (
@@ -677,6 +699,16 @@ export default function DashboardPage() {
           <KnowledgeBaseCard
             repo={selectedIndexRepo}
             onClose={() => setSelectedIndexRepo(null)}
+          />
+        </div>
+      )}
+
+      {/* ── Multi-Modal Codebase Search Section (if selected) ───────────── */}
+      {selectedSearchRepo && (
+        <div className="mb-8">
+          <SearchExplorer
+            repo={selectedSearchRepo}
+            onClose={() => setSelectedSearchRepo(null)}
           />
         </div>
       )}
@@ -767,6 +799,7 @@ export default function DashboardPage() {
                 deleting={deletingId === repo.id}
                 onExploreSymbols={(r) => setSelectedExplorerRepo(r)}
                 onIndexRepo={(r) => setSelectedIndexRepo(r)}
+                onSearchRepo={(r) => setSelectedSearchRepo(r)}
               />
             ))}
           </div>

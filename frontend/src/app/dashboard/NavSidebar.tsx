@@ -17,7 +17,7 @@ const MOBILE_BP = 1024; // px — below this, sidebar becomes an overlay
 const navItems = [
   { href: "/",               icon: Home,          label: "Home"         },
   { href: "/dashboard",      icon: GitBranch,     label: "Repositories" },
-  { href: "/dashboard/search", icon: Search,      label: "Search",  soon: true },
+  { href: "/dashboard",       icon: Search,        label: "Search"       },
   { href: "/dashboard/chat",   icon: MessageSquare, label: "Chat",   soon: true },
   { href: "/dashboard/plan",   icon: Zap,         label: "Planner", soon: true },
   { href: "/dashboard/code",   icon: FileCode,    label: "Code",    soon: true },
