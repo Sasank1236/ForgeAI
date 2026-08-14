@@ -5,7 +5,7 @@ Pydantic DTOs (Data Transfer Objects) are added here incrementally:
   Phase 3: symbol.py, import_.py, parser.py  ✓
   Phase 4: embedding.py   ✓
   Phase 5: search.py      ✓
-  Phase 6: chat.py
+  Phase 6: chat.py        ✓
   Phase 7: plan.py
 """
 
@@ -55,6 +55,17 @@ from forgeai.schemas.search import (
     SearchType,
 )
 
+# Phase 6
+from forgeai.schemas.chat import (
+    ChatMessageCreate,
+    ChatMessageResponse,
+    ChatSessionCreate,
+    ChatSessionListResponse,
+    ChatSessionResponse,
+    ChatStreamChunk,
+    CitationItem,
+)
+
 __all__ = [
     # Phase 2
     "ImportRequest",
@@ -88,4 +99,12 @@ __all__ = [
     "SearchResponse",
     "SearchResultItem",
     "SearchType",
+    # Phase 6 — chat
+    "CitationItem",
+    "ChatSessionCreate",
+    "ChatSessionResponse",
+    "ChatSessionListResponse",
+    "ChatMessageCreate",
+    "ChatMessageResponse",
+    "ChatStreamChunk",
 ]
