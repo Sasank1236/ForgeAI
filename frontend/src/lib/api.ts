@@ -27,6 +27,13 @@ import type {
   SearchQueryRequest,
   SearchResponse,
 } from "@/types/search";
+import type {
+  ChatMessageCreate,
+  ChatMessageResponse,
+  ChatSessionCreate,
+  ChatSessionListResponse,
+  ChatSessionResponse,
+} from "@/types/chat";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1",
@@ -153,6 +160,61 @@ export async function searchRepository(
 ): Promise<SearchResponse> {
   const { data } = await api.post<SearchResponse>(
     `/repositories/${repoId}/search`,
+    request
+  );
+  return data;
+}
+
+// ── Phase 6: Repository Chat Endpoints ────────────────────────────────────────
+
+/** Create a new codebase chat session. */
+export async function createChatSession(
+  repoId: string,
+  request?: ChatSessionCreate
+): Promise<ChatSessionResponse> {
+  const { data } = await api.post<ChatSessionResponse>(
+    `/repositories/${repoId}/chat/sessions`,
+    request ?? {}
+  );
+  return data;
+}
+
+/** List all chat sessions for a repository. */
+export async function listChatSessions(
+  repoId: string
+): Promise<ChatSessionListResponse> {
+  const { data } = await api.get<ChatSessionListResponse>(
+    `/repositories/${repoId}/chat/sessions`
+  );
+  return data;
+}
+
+/** Get session details and full message history. */
+export async function getChatSession(
+  sessionId: string
+): Promise<{ session: ChatSessionResponse; messages: ChatMessageResponse[] }> {
+  const { data } = await api.get<{
+    session: ChatSessionResponse;
+    messages: ChatMessageResponse[];
+  }>(`/chat/sessions/${sessionId}`);
+  return data;
+}
+
+/** Delete a chat session. */
+export async function deleteChatSession(sessionId: string): Promise<{ deleted: boolean }> {
+  const { data } = await api.delete<{ deleted: boolean }>(
+    `/chat/sessions/${sessionId}`
+  );
+  return data;
+}
+
+/** Send user prompt and return assistant response with citations. */
+export async function sendChatMessage(
+  sessionId: string,
+  request: ChatMessageCreate
+): Promise<ChatMessageResponse> {
+  const { data } = await api.post<ChatMessageResponse>(
+    `/chat/sessions/${sessionId}/messages`,
     request
   );
   return data;
