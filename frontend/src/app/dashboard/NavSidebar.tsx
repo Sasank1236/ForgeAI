@@ -18,7 +18,7 @@ const navItems = [
   { href: "/",               icon: Home,          label: "Home"         },
   { href: "/dashboard",      icon: GitBranch,     label: "Repositories" },
   { href: "/dashboard",       icon: Search,        label: "Search"       },
-  { href: "/dashboard/chat",   icon: MessageSquare, label: "Chat",   soon: true },
+  { href: "/dashboard/chat",   icon: MessageSquare, label: "Chat"         },
   { href: "/dashboard/plan",   icon: Zap,         label: "Planner", soon: true },
   { href: "/dashboard/code",   icon: FileCode,    label: "Code",    soon: true },
   { href: "/dashboard/stats",  icon: BarChart3,   label: "Stats",   soon: true },
