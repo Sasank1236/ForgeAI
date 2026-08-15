@@ -11,7 +11,7 @@ import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from forgeai.api.v1 import chat, health, repositories
+from forgeai.api.v1 import chat, health, planner, repositories
 from forgeai.config import get_settings
 from forgeai.core.logging import configure_logging
 from forgeai.redis_client import close_redis_pool
@@ -63,3 +63,4 @@ app.add_middleware(
 app.include_router(health.router, prefix="/api/v1", tags=["Health"])
 app.include_router(repositories.router, prefix="/api/v1", tags=["Repositories"])
 app.include_router(chat.router, prefix="/api/v1", tags=["Repository Chat"])
+app.include_router(planner.router, prefix="/api/v1", tags=["AI Task Planner"])
