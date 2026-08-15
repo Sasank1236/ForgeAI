@@ -5,6 +5,7 @@ Data access layer (DAL) objects are added here incrementally:
   Phase 3: symbol_repo.py, import_repo.py    ✓
   Phase 4: embedding_repo.py                ✓
   Phase 6: chat_repo.py                     ✓
+  Phase 7: plan_repo.py                     ✓
 """
 
 # Phase 2
@@ -21,11 +22,15 @@ from forgeai.repositories.embedding_repo import EmbeddingRepo
 # Phase 6
 from forgeai.repositories.chat_repo import ChatRepo
 
+# Phase 7
+from forgeai.repositories.plan_repo import PlanRepo
+
 __all__ = [
     "ChatRepo",
     "EmbeddingRepo",
     "FileRepo",
     "ImportRepo",
+    "PlanRepo",
     "RepositoryRepo",
     "SymbolRepo",
 ]
