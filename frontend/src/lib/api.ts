@@ -34,6 +34,13 @@ import type {
   ChatSessionListResponse,
   ChatSessionResponse,
 } from "@/types/chat";
+import type {
+  CodeSuggestionRequest,
+  CodeSuggestionResponse,
+  PlanCreateRequest,
+  TaskPlanListResponse,
+  TaskPlanResponse,
+} from "@/types/plan";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1",
@@ -215,6 +222,54 @@ export async function sendChatMessage(
 ): Promise<ChatMessageResponse> {
   const { data } = await api.post<ChatMessageResponse>(
     `/chat/sessions/${sessionId}/messages`,
+    request
+  );
+  return data;
+}
+
+// ── Phase 7: AI Task Planner Endpoints ────────────────────────────────────────
+
+/** Generate an AI task decomposition execution plan. */
+export async function createTaskPlan(
+  repoId: string,
+  request: PlanCreateRequest
+): Promise<TaskPlanResponse> {
+  const { data } = await api.post<TaskPlanResponse>(
+    `/repositories/${repoId}/plans`,
+    request
+  );
+  return data;
+}
+
+/** List all execution plans generated for a repository. */
+export async function listTaskPlans(
+  repoId: string
+): Promise<TaskPlanListResponse> {
+  const { data } = await api.get<TaskPlanListResponse>(
+    `/repositories/${repoId}/plans`
+  );
+  return data;
+}
+
+/** Get plan details and step-by-step diffs. */
+export async function getTaskPlan(planId: string): Promise<TaskPlanResponse> {
+  const { data } = await api.get<TaskPlanResponse>(`/plans/${planId}`);
+  return data;
+}
+
+/** Delete a task plan. */
+export async function deleteTaskPlan(planId: string): Promise<{ deleted: boolean }> {
+  const { data } = await api.delete<{ deleted: boolean }>(`/plans/${planId}`);
+  return data;
+}
+
+/** Generate targeted code edit suggestion diff for a file. */
+export async function generateCodeSuggestion(
+  repoId: string,
+  request: CodeSuggestionRequest
+): Promise<CodeSuggestionResponse> {
+  const { data } = await api.post<CodeSuggestionResponse>(
+    `/repositories/${repoId}/suggest-code`,
     request
   );
   return data;
