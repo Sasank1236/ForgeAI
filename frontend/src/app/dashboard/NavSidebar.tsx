@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   GitBranch, BarChart3, Search, MessageSquare,
   Zap, FileCode, Home, ChevronLeft, ChevronRight,
-  Menu, X,
+  Menu, X, BookOpen,
 } from "lucide-react";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -20,6 +20,7 @@ const navItems = [
   { href: "/dashboard",       icon: Search,        label: "Search"       },
   { href: "/dashboard/chat",   icon: MessageSquare, label: "Chat"         },
   { href: "/dashboard/plan",   icon: Zap,         label: "Planner"      },
+  { href: "/dashboard/docs",   icon: BookOpen,    label: "Docs"         },
   { href: "/dashboard/code",   icon: FileCode,    label: "Code",    soon: true },
   { href: "/dashboard/stats",  icon: BarChart3,   label: "Stats",   soon: true },
 ];
