@@ -94,6 +94,12 @@ class Repository(Base):
         cascade="all, delete-orphan",
         lazy="select",
     )
+    docs: Mapped[list] = relationship(
+        "Documentation",
+        back_populates="repository",
+        cascade="all, delete-orphan",
+        lazy="select",
+    )
 
     def __repr__(self) -> str:
         return f"<Repository id={self.id} name={self.name!r} status={self.status}>"

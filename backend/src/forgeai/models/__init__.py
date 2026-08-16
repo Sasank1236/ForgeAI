@@ -6,14 +6,11 @@ ORM models are added here incrementally:
   Phase 4: embedding.py            ✓
   Phase 6: chat.py                 ✓
   Phase 7: plan.py                 ✓
-  Phase 9: documentation.py
-
-Importing this package is sufficient for Alembic autogenerate and
-SQLAlchemy relationship resolution -- all models register themselves
-against ``Base.metadata`` on import.
+  Phase 8: documentation.py        ✓
 """
 
 from forgeai.models.chat import ChatMessage, ChatSession, MessageRole
+from forgeai.models.documentation import DocStatus, DocType, Documentation
 from forgeai.models.embedding import ChunkType, CodeEmbedding
 from forgeai.models.file import RepositoryFile
 from forgeai.models.import_ import Import, ImportType
@@ -26,6 +23,9 @@ __all__ = [
     "ChatSession",
     "ChunkType",
     "CodeEmbedding",
+    "DocStatus",
+    "DocType",
+    "Documentation",
     "Import",
     "ImportType",
     "MessageRole",
