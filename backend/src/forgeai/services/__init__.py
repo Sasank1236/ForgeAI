@@ -7,7 +7,7 @@ Business logic services are added here incrementally:
   Phase 5: search.py                           ✓
   Phase 6: context_builder.py, chat_service.py ✓
   Phase 7: task_planner.py, code_suggestion.py ✓
-  Phase 8: documentation.py
+  Phase 8: documentation_service.py            ✓
 """
 
 # Phase 2
@@ -34,6 +34,9 @@ from forgeai.services.context_builder import ContextBuilderService
 from forgeai.services.code_suggestion import CodeSuggestionService
 from forgeai.services.task_planner import TaskPlannerService
 
+# Phase 8
+from forgeai.services.documentation_service import DocumentationService
+
 __all__ = [
     "RepositoryScanner",
     "RepositoryService",
@@ -50,4 +53,5 @@ __all__ = [
     "ChatService",
     "TaskPlannerService",
     "CodeSuggestionService",
+    "DocumentationService",
 ]
