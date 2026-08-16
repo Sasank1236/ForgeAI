@@ -110,6 +110,15 @@ class FileRepo:
 
         return files, total
 
+    async def list_all_by_repo(self, repo_id: UUID) -> list[RepositoryFile]:
+        """Fetch all RepositoryFile rows for a repository without pagination."""
+        result = await self._db.execute(
+            select(RepositoryFile)
+            .where(RepositoryFile.repository_id == repo_id)
+            .order_by(RepositoryFile.relative_path)
+        )
+        return list(result.scalars().all())
+
     async def get_stats(self, repo_id: UUID) -> dict:
         """Compute scan statistics directly from the database.
 

@@ -53,9 +53,11 @@ class DocumentationService:
             raise ValueError(f"Repository {repository_id} not found.")
 
         # Gather repository metadata
-        files = await self._file_repo.list_by_repository(repository_id)
-        symbols = await self._symbol_repo.list_by_repository(repository_id)
-        imports = await self._import_repo.list_by_repository(repository_id)
+        files = await self._file_repo.list_all_by_repo(repository_id)
+        symbols_tuple = await self._symbol_repo.list_by_repo(repository_id)
+        symbols = symbols_tuple[0] if isinstance(symbols_tuple, tuple) else symbols_tuple
+        imports_tuple = await self._import_repo.list_by_repo(repository_id)
+        imports = imports_tuple[0] if isinstance(imports_tuple, tuple) else imports_tuple
 
         # Synthesize Markdown based on doc_type
         doc_title, doc_content, default_file_path = await self._synthesize_doc(
