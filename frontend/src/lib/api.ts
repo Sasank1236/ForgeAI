@@ -41,6 +41,12 @@ import type {
   TaskPlanListResponse,
   TaskPlanResponse,
 } from "@/types/plan";
+import type {
+  DocGenerateRequest,
+  DocUpdateRequest,
+  DocumentationListResponse,
+  DocumentationResponse,
+} from "@/types/documentation";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1",
@@ -272,5 +278,50 @@ export async function generateCodeSuggestion(
     `/repositories/${repoId}/suggest-code`,
     request
   );
+  return data;
+}
+
+// ── Phase 8: Auto Documentation Endpoints ─────────────────────────────────────
+
+/** Generate repository technical documentation (README, Architecture, API Reference). */
+export async function generateDocumentation(
+  repoId: string,
+  request: DocGenerateRequest
+): Promise<DocumentationResponse> {
+  const { data } = await api.post<DocumentationResponse>(
+    `/repositories/${repoId}/docs/generate`,
+    request
+  );
+  return data;
+}
+
+/** List all generated documentation records for a repository. */
+export async function listDocumentation(
+  repoId: string
+): Promise<DocumentationListResponse> {
+  const { data } = await api.get<DocumentationListResponse>(
+    `/repositories/${repoId}/docs`
+  );
+  return data;
+}
+
+/** Fetch a single documentation record by UUID. */
+export async function getDocumentation(docId: string): Promise<DocumentationResponse> {
+  const { data } = await api.get<DocumentationResponse>(`/docs/${docId}`);
+  return data;
+}
+
+/** Update documentation Markdown content or title. */
+export async function updateDocumentation(
+  docId: string,
+  request: DocUpdateRequest
+): Promise<DocumentationResponse> {
+  const { data } = await api.put<DocumentationResponse>(`/docs/${docId}`, request);
+  return data;
+}
+
+/** Delete a documentation record. */
+export async function deleteDocumentation(docId: string): Promise<{ deleted: boolean }> {
+  const { data } = await api.delete<{ deleted: boolean }>(`/docs/${docId}`);
   return data;
 }
