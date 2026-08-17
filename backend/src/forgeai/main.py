@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from forgeai.api.v1 import chat, documentation, health, planner, repositories
 from forgeai.config import get_settings
 from forgeai.core.logging import configure_logging
+from forgeai.core.middleware import RequestLoggingMiddleware
 from forgeai.redis_client import close_redis_pool
 
 settings = get_settings()
@@ -51,6 +52,7 @@ app = FastAPI(
 )
 
 # ─── Middleware ────────────────────────────────────────────────────────────────
+app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins,
