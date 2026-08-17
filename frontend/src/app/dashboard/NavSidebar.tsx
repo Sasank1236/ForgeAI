@@ -21,8 +21,8 @@ const navItems = [
   { href: "/dashboard/chat",   icon: MessageSquare, label: "Chat"         },
   { href: "/dashboard/plan",   icon: Zap,         label: "Planner"      },
   { href: "/dashboard/docs",   icon: BookOpen,    label: "Docs"         },
-  { href: "/dashboard/code",   icon: FileCode,    label: "Code",    soon: true },
-  { href: "/dashboard/stats",  icon: BarChart3,   label: "Stats",   soon: true },
+  { href: "/dashboard/code",   icon: FileCode,    label: "Code"         },
+  { href: "/dashboard/stats",  icon: BarChart3,   label: "Stats"        },
 ];
 
 // ── Shell ─────────────────────────────────────────────────────────────────────
