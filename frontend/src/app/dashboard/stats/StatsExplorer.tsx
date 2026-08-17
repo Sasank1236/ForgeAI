@@ -26,8 +26,15 @@ export function StatsExplorer() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchHealth = (isManual = false) => {
-    if (isManual) setRefreshing(true);
+  const handleManualRefresh = () => {
+    setRefreshing(true);
+    getSystemHealth()
+      .then((data) => setHealth(data))
+      .catch(() => setHealth(null))
+      .finally(() => setRefreshing(false));
+  };
+
+  useEffect(() => {
     let isMounted = true;
     getSystemHealth()
       .then((data) => {
@@ -45,10 +52,6 @@ export function StatsExplorer() {
     return () => {
       isMounted = false;
     };
-  };
-
-  useEffect(() => {
-    return fetchHealth();
   }, []);
 
   return (
@@ -72,7 +75,7 @@ export function StatsExplorer() {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => fetchHealth(true)}
+              onClick={handleManualRefresh}
               disabled={refreshing}
               className="btn btn-secondary text-xs px-3.5 py-2.5 rounded-xl flex items-center gap-2"
             >

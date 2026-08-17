@@ -55,7 +55,6 @@ export function CodeExplorer() {
   useEffect(() => {
     if (!selectedRepoId) return;
     let isMounted = true;
-    setLoadingFiles(true);
     listFiles(selectedRepoId, 1, 100)
       .then((res) => {
         if (isMounted) {
@@ -82,7 +81,6 @@ export function CodeExplorer() {
   useEffect(() => {
     if (!selectedRepoId) return;
     let isMounted = true;
-    setLoadingSymbols(true);
     listSymbols(selectedRepoId, { page_size: 100 })
       .then((res) => {
         if (isMounted) setSymbols(res.items);
