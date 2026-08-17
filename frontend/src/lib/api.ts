@@ -47,6 +47,7 @@ import type {
   DocumentationListResponse,
   DocumentationResponse,
 } from "@/types/documentation";
+import type { SystemHealthResponse } from "@/types/system";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1",
@@ -323,5 +324,13 @@ export async function updateDocumentation(
 /** Delete a documentation record. */
 export async function deleteDocumentation(docId: string): Promise<{ deleted: boolean }> {
   const { data } = await api.delete<{ deleted: boolean }>(`/docs/${docId}`);
+  return data;
+}
+
+// ── Phase 9: System Telemetry & Readiness Endpoints ───────────────────────────
+
+/** Fetch comprehensive system observability and database telemetry metrics. */
+export async function getSystemHealth(): Promise<SystemHealthResponse> {
+  const { data } = await api.get<SystemHealthResponse>("/health/system");
   return data;
 }
